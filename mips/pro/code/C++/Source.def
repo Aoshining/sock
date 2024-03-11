@@ -1,0 +1,16 @@
+LIBRARY C++
+EXPORTS
+intFloat
+intDouble
+myInt
+intCompute
+doubleCompute
+floatCompute
+assembl
+disassembl
+Register
+Operate
+Clear
+decCompute
+intDec
+InitPC
