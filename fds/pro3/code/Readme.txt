@@ -1,0 +1,1 @@
+Use vscode to open cx2023_xxx_P3.c, click "Run code" in the upper right corner to run the program.
