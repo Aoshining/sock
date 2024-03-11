@@ -1,0 +1,315 @@
+#include <cuda.h>
+#include <cublas_v2.h>
+#include <cstdlib>
+#include <iomanip>
+#include <iostream>
+#include <random>
+#include <omp.h>
+#include <mma.h>
+using namespace nvcuda;
+
+const int block_size = 16;
+const int size = 10001;     // Matrix Size (size * size)
+const int iter = 2;     // Number of iterations
+
+#define a(_x, _y) a[(_x) * size + (_y)]
+#define b(_x, _y) b[(_x) * size + (_y)]
+#define result(_x, _y) result[(_x) * size + (_y)]
+#define CUDA_CALL(func)                                               \
+  {                                                                   \
+    cudaError_t e = (func);                                           \
+    if (!(e == cudaSuccess || e == cudaErrorCudartUnloading))         \
+    {                                                                 \
+      fprintf(stderr, "CUDA: %s:%d: error: %s\n", __FILE__, __LINE__, \
+              cudaGetErrorString(e));                                 \
+      abort();                                                        \
+    }                                                                 \
+  }
+#define CUBLAS_CALL(func)                                             \
+  {                                                                   \
+    cublasStatus_t e = (func);                                        \
+    if (!(e == CUBLAS_STATUS_SUCCESS))                                \
+    {                                                                 \
+      fprintf(stderr, "CUBLAS: %s:%d: error: %d\n", __FILE__, __LINE__, \
+              e);                                 \
+      abort();                                                        \
+    }                                                                 \
+  }
+
+/// \brief Simply generate a random matrix.
+void Generate(double *const a) {
+  srand(time(NULL));
+  // Matrix row.
+#pragma omp parallel for
+  for (int i = 0; i < size; ++i) {
+    // Matrix column.
+    for (int j = 0; j < size; ++j) {
+      // Matrix element.
+      a(i, j) = rand() % 100 / 100.0f;
+    }
+  }
+}
+
+/// \brief Check the correctness of the result and compare performace by using Cublas.
+void CublasImplete(const double *__restrict__ a,
+                   const double *__restrict__ b,
+                   double *__restrict__ result,
+                   cudaEvent_t *start_cublas, cudaEvent_t *stop_cublas) {
+  double *a_kernel_1, *a_kernel_2, *b_kernel, *result_kernel;
+  CUDA_CALL(cudaMalloc(&a_kernel_1, size * size * sizeof(double)));
+  CUDA_CALL(cudaMemcpy(a_kernel_1, a, size * size * sizeof(double), cudaMemcpyHostToDevice));
+  CUDA_CALL(cudaMalloc(&a_kernel_2, size * size * sizeof(double)));
+  CUDA_CALL(cudaMemcpy(a_kernel_2, a_kernel_1, size * size * sizeof(double), cudaMemcpyDeviceToDevice));
+  CUDA_CALL(cudaMalloc(&b_kernel, size * size * sizeof(double)));
+  CUDA_CALL(cudaMemcpy(b_kernel, b, size * size * sizeof(double), cudaMemcpyHostToDevice));
+  CUDA_CALL(cudaMalloc(&result_kernel, size * size * sizeof(double)));
+
+  cudaEventRecord(*start_cublas);
+  // Use cublasDgeam to (A + (k - 1) * B) + B -> A + k * B.
+  cublasHandle_t handle;
+  CUBLAS_CALL(cublasCreate(&handle));
+  double alpha = 1.0f;
+  double betageam = 1.0f;
+  double betagemm = 0.0f;
+  for (int i = 0; i < iter; ++i) {
+    CUBLAS_CALL(cublasDgeam(handle, CUBLAS_OP_N, CUBLAS_OP_N, size, size, &alpha, a_kernel_2, size, &betageam, b_kernel, size, a_kernel_2, size));
+    
+    CUBLAS_CALL(cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, size, size, size, &alpha, a_kernel_2, size, a_kernel_1, size, &betagemm, result_kernel, size));
+    double *tmp = a_kernel_1;
+    a_kernel_1 = result_kernel;
+    result_kernel = tmp;
+  }
+
+  cudaEventRecord(*stop_cublas);
+  cudaEventSynchronize(*stop_cublas);
+
+  CUBLAS_CALL(cublasGetMatrix(size, size, sizeof(double), a_kernel_1, size, result, size));
+  CUBLAS_CALL(cublasDestroy(handle));
+
+  return;
+}
+
+/// \brief Check the correctness of the result.
+void Verify(const double *const result,
+            const double *const result_cublas) {
+  bool correct = true;
+  for (int i = 0; i < size * size; ++i) {
+    // check if there is inf
+    if (result[i] == INFINITY || result[i] == -INFINITY) {
+      std::cout << "\x1b[31m"
+                   "Wrong Answer"
+                   "\x1b[0m"
+                   " at ("
+                << i / size << ", " << i % size << "): ";
+      std::cout << "expected " << std::setprecision(6) << result_cublas[i]
+                << ", got " << result[i]
+                << std::endl;
+      correct = false;
+      break;
+    }
+    if (fabs(result[i]) < 1e-6 || fabs(result_cublas[i]) < 1e-6) {
+      std::cout << "\x1b[31m"
+                   "Wrong Answer"
+                   "\x1b[0m"
+                   " at ("
+                << i / size << ", " << i % size << "): ";
+      std::cout << "expected " << std::setprecision(6) << result_cublas[i]
+                << ", got " << result[i]
+                << std::endl;
+      correct = false;
+      break;
+    }
+    double error = fabs(result[i] - result_cublas[i]) / result_cublas[i];
+    if (error > 1e-6) {
+      correct = false;
+      std::cout << "\x1b[31m"
+                   "Wrong Answer"
+                   "\x1b[0m"
+                   " at ("
+                << i / size << ", " << i % size << "): ";
+      std::cout << "expected " << std::setprecision(6) << result_cublas[i]
+                << ", got " << result[i]
+                << std::endl;
+      break;
+    }
+  }
+  if (correct) {
+    std::cout << "\x1b[32m"
+                "Correct"
+                "\x1b[0m"
+              << std::endl;
+  }
+  return;
+}
+
+#define coreSizeM 8
+#define coreSizeN 8
+#define coreSizeK 4 
+__global__ void TensorCore(double* a, double* b, double* c)
+{
+const unsigned int x = (blockDim.x * blockIdx.x + threadIdx.x) / 32;
+const unsigned int y = blockDim.y * blockIdx.y + threadIdx.y;
+const unsigned int aRow = x * coreSizeM;//当前wrap在a的M方向上的线程位置
+const unsigned int bCol = y * coreSizeN;//当前wrap在b的N方向上的线程位置
+if (aRow >= size || bCol >= size) return;
+//声明fragment
+wmma::fragment<wmma::matrix_a, coreSizeM, coreSizeN, coreSizeK, double, wmma::row_major> a_frag;
+wmma::fragment<wmma::matrix_b, coreSizeM, coreSizeN, coreSizeK, double, wmma::row_major> b_frag;
+wmma::fragment<wmma::accumulator, coreSizeM, coreSizeN, coreSizeK, double> c_frag;
+wmma::fill_fragment(c_frag,0.f);//清空c
+for (int i = 0; i < size; i += coreSizeK)
+{
+const unsigned int aCol = i;//当前wrap在a的K方向上的线程位置
+const unsigned int bRow = i;//当前wrap在b的K方向上的线程位置
+//加载a,b
+wmma::load_matrix_sync(a_frag, a + aCol + aRow * size, size);
+wmma::load_matrix_sync(b_frag, b + bCol + bRow * size, size);
+//计算a*b并存入c中
+wmma::mma_sync(c_frag, a_frag, b_frag, c_frag);
+} 
+wmma::store_matrix_sync(c + bCol + aRow * size, c_frag, size, wmma::mem_row_major);
+}
+
+/// \brief Let A to be A + B.
+__global__ void AdderCudaKernel(double *__restrict__ a,
+                                  const double *__restrict__ b)
+{
+  const int index_x = threadIdx.x + blockIdx.x * block_size;
+  const int stride_x = block_size * gridDim.x;
+  const int index_y = threadIdx.y + blockIdx.y * block_size;
+  const int stride_y = block_size * gridDim.y;
+  for(int i = index_x; i < size; i += stride_x)
+    for(int j = index_y; j < size; j += stride_y)
+    {
+      a(i, j) += b(i, j);
+    }
+}
+
+/// \brief Do Matrix Multiplication on GPU.
+__global__ void MultipleCudaKernel(const double *__restrict__ a, 
+                                     const double *__restrict__ b, 
+                                     double *__restrict__ result) 
+{
+  const int row = blockIdx.y * block_size + threadIdx.y;//行索引
+  const int col = blockIdx.x * block_size + threadIdx.x;//列索引
+  __shared__ double a_share[block_size][block_size];//使用共享内存，访问共享内存速度比访问全局内存速度更快
+  __shared__ double b_share[block_size][block_size];
+  double sum = 0;
+  const int idrow = threadIdx.y;//当前线程块的行索引
+  const int idcol = threadIdx.x;//当前线程块的列索引
+  for (int tile = 0; tile <= size / block_size; tile++)//将输入矩阵分成更小的块
+  {
+    a_share[idrow][idcol] = 0;//初始化数组
+    b_share[idrow][idcol] = 0;
+    if (row < size && block_size * tile + idcol < size)//判断是否越界
+    a_share[idrow][idcol] = a[tile * block_size + row * size + idcol];//a数组中待加载元素的索引：全局内存中的起始位置+result矩阵中的行索引+a矩阵中的列索引
+    if (col < size && block_size * tile + idrow < size)
+    b_share[idrow][idcol] = b[tile * block_size * size + col + idrow * size];//b数组中待加载元素的索引：全局内存中的起始位置+b矩阵中的行索引+result矩阵中的列索引
+    __syncthreads();//同步当前线程块中的线程
+    for (int i = 0; i < block_size; i++)
+    sum += a_share[idrow][i] * b_share[i][idcol];
+    __syncthreads();
+  }
+  if (row < size && col < size)
+  result(row, col) = sum;
+}
+
+// Naive implementation, only for testing correctness and precision
+void MultipleCuda(const double *const a, const double *const b, double *const result,
+                   cudaEvent_t *start_e, cudaEvent_t *stop_e) 
+{
+  
+  double *a_kernel, *b_kernel, *copy_kernel, *result_kernel;
+  CUDA_CALL(cudaMalloc(&a_kernel, size * size * sizeof(double)));
+  CUDA_CALL(cudaMemcpy(a_kernel, a, size * size * sizeof(double), cudaMemcpyHostToDevice));
+  CUDA_CALL(cudaMalloc(&b_kernel, size * size * sizeof(double)));
+  CUDA_CALL(cudaMemcpy(b_kernel, b, size * size * sizeof(double), cudaMemcpyHostToDevice));
+  CUDA_CALL(cudaMalloc(&copy_kernel, size * size * sizeof(double)));
+  CUDA_CALL(cudaMemcpy(copy_kernel, a_kernel, size * size * sizeof(double), cudaMemcpyDeviceToDevice));
+  CUDA_CALL(cudaMalloc(&result_kernel, size * size * sizeof(double)));
+  
+  // Start Timer.
+  cudaEventRecord(*start_e);
+  
+  // Run Matrix Multiplication.
+  // Parameters to be set:
+  dim3 grid((((size + 8 - 1) / 8) * 32 + 32 - 1) / 32,
+            (size + 8 - 1) / 8);
+  dim3 block(32, 1);
+  //10001*10001先padding到8的整数倍上，变成10008*10008，coreSize是8*8*4则x方向上需要10008/8=1251个core，y方向上10008/8=1251个core，而每个core在x方向上需要32个线程，所以x方向上至少需要1251*32=40032个线程，y方向上至少需要1251个线程，而这32个线程不能分割到不同的block里面，所以blockSize如果取(32, 1)的大小，gridSize就是((40032 + 31)/32, 1251)
+
+  // Calculate \Prod_{k=0}^{n} (A + k * B).
+  for (int i = 0; i < iter; ++i) {
+    // @note: you can also use CUDA API to launch a cuda kernel function,
+    // __host__ cudaError_t cudaLaunchKernel;
+    // Perform (A + (k - 1) * B) + B -> A + k * B.
+    AdderCudaKernel<<<grid, block>>>(copy_kernel, b_kernel);
+    CUDA_CALL(cudaDeviceSynchronize());
+    // Perform A * B -> Result.
+    //MultipleCudaKernel<<<grid, block>>>(a_kernel, copy_kernel, result_kernel);
+    //CUDA_CALL(cudaDeviceSynchronize());
+    TensorCore<<<grid,block>>>(a_kernel,copy_kernel,result_kernel);
+
+    // Swap pointers between A and Result.
+    double *tmp = a_kernel;
+    a_kernel = result_kernel;
+    result_kernel = tmp;
+  }
+
+  // Stop Timer
+  cudaEventRecord(*stop_e);
+  cudaEventSynchronize(*stop_e);
+
+  // At the end of the loop, the result is in a_kernel.
+  CUDA_CALL(cudaMemcpy(result, a_kernel, size * size * sizeof(double), cudaMemcpyDeviceToHost));
+  cudaFree(a_kernel);
+  cudaFree(b_kernel);
+  cudaFree(copy_kernel);
+  cudaFree(result_kernel);
+}
+
+int main() {
+  auto a = new double[size * size];
+  auto b = new double[size * size];
+  auto result = new double[size * size];
+  auto result_cublas = new double[size * size];
+  std::cout << "Generating input matrices... \n";
+  Generate(a);
+  Generate(b);
+
+  cudaEvent_t start_e, stop_e;
+  cudaEventCreate(&start_e);
+  cudaEventCreate(&stop_e);
+
+  // Perform Matrix Multiplication on GPU.
+  std::cout << "Custom Matrix Multiplication on GPU... \n";
+  MultipleCuda(a, b, result, &start_e, &stop_e);
+
+  cudaEvent_t start_cublas, stop_cublas;
+  cudaEventCreate(&start_cublas);
+  cudaEventCreate(&stop_cublas);
+  std::cout << "cuBLAS Matrix Multiplication on GPU... \n";
+  CublasImplete(a, b, result_cublas, &start_cublas, &stop_cublas);
+
+  std::cout << "Verifying... \n";
+  // Verify the result.
+  Verify(result, result_cublas);
+
+  // Calculate to evaluate performance.
+  float milliseconds = 0;
+  cudaEventElapsedTime(&milliseconds, start_e, stop_e);
+  std::cout << "Custom: " << milliseconds << " milliseconds" << std::endl;
+  cudaEventElapsedTime(&milliseconds, start_cublas, stop_cublas);
+  std::cout << "cuBLAS: " << milliseconds << " milliseconds" << std::endl;
+  cudaEventDestroy(start_e);
+  cudaEventDestroy(stop_e);
+  cudaEventDestroy(start_cublas);
+  cudaEventDestroy(stop_cublas);
+
+  // Delete allocated memory.
+  delete[] a;
+  delete[] b;
+  delete[] result;
+  return 0;
+}
+

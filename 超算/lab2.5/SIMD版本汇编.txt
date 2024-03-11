@@ -1,0 +1,209 @@
+a:
+        .zero   400000000
+b:
+        .zero   400000000
+c:
+        .zero   400000000
+d:
+        .zero   400000000
+.LC3:
+        .string "time=%f\n"
+.LC5:
+        .string "Check Failed at %d\n"
+.LC6:
+        .string "Check Passed"
+main:
+        lea     r10, [rsp+8]
+        and     rsp, -64
+        push    QWORD PTR [r10-8]
+        push    rbp
+        mov     rbp, rsp
+        push    r10
+        sub     rsp, 680
+        mov     DWORD PTR [rbp-52], 0
+        jmp     .L4
+.L5:
+        call    rand
+        add     eax, 1
+        vcvtsi2sd       xmm1, xmm1, eax
+        vmovsd  xmm0, QWORD PTR .LC1[rip]
+        vdivsd  xmm0, xmm0, xmm1
+        vcvtsd2ss       xmm0, xmm0, xmm0
+        mov     eax, DWORD PTR [rbp-52]
+        cdqe
+        vmovss  DWORD PTR a[0+rax*4], xmm0
+        call    rand
+        add     eax, 1
+        vcvtsi2sd       xmm1, xmm1, eax
+        vmovsd  xmm0, QWORD PTR .LC1[rip]
+        vdivsd  xmm0, xmm0, xmm1
+        vcvtsd2ss       xmm0, xmm0, xmm0
+        mov     eax, DWORD PTR [rbp-52]
+        cdqe
+        vmovss  DWORD PTR b[0+rax*4], xmm0
+        add     DWORD PTR [rbp-52], 1
+.L4:
+        cmp     DWORD PTR [rbp-52], 99999999
+        jle     .L5
+        mov     DWORD PTR [rbp-56], 0
+        jmp     .L6
+.L9:
+        mov     DWORD PTR [rbp-60], 0
+        jmp     .L7
+.L8:
+        mov     eax, DWORD PTR [rbp-60]
+        cdqe
+        vmovss  xmm1, DWORD PTR d[0+rax*4]
+        mov     eax, DWORD PTR [rbp-60]
+        cdqe
+        vmovss  xmm2, DWORD PTR a[0+rax*4]
+        mov     eax, DWORD PTR [rbp-60]
+        cdqe
+        vmovss  xmm0, DWORD PTR b[0+rax*4]
+        vmulss  xmm0, xmm2, xmm0
+        vaddss  xmm0, xmm1, xmm0
+        mov     eax, DWORD PTR [rbp-60]
+        cdqe
+        vmovss  DWORD PTR d[0+rax*4], xmm0
+        add     DWORD PTR [rbp-60], 1
+.L7:
+        cmp     DWORD PTR [rbp-60], 99999999
+        jle     .L8
+        add     DWORD PTR [rbp-56], 1
+.L6:
+        cmp     DWORD PTR [rbp-56], 19
+        jle     .L9
+        call    clock
+        mov     QWORD PTR [rbp-80], rax
+        mov     DWORD PTR [rbp-64], 0
+        jmp     .L10
+.L17:
+        mov     DWORD PTR [rbp-68], 0
+        jmp     .L11
+.L16:
+        mov     eax, DWORD PTR [rbp-68]
+        cdqe
+        sal     rax, 2
+        add     rax, OFFSET FLAT:a
+        mov     QWORD PTR [rbp-648], rax
+        mov     rax, QWORD PTR [rbp-648]
+        vmovaps zmm0, ZMMWORD PTR [rax]
+        vmovaps ZMMWORD PTR [rbp-176], zmm0
+        mov     eax, DWORD PTR [rbp-68]
+        cdqe
+        sal     rax, 2
+        add     rax, OFFSET FLAT:b
+        mov     QWORD PTR [rbp-640], rax
+        mov     rax, QWORD PTR [rbp-640]
+        vmovaps zmm0, ZMMWORD PTR [rax]
+        vmovaps ZMMWORD PTR [rbp-240], zmm0
+        mov     eax, DWORD PTR [rbp-68]
+        cdqe
+        sal     rax, 2
+        add     rax, OFFSET FLAT:c
+        mov     QWORD PTR [rbp-632], rax
+        mov     rax, QWORD PTR [rbp-632]
+        vmovaps zmm0, ZMMWORD PTR [rax]
+        vmovaps zmm1, ZMMWORD PTR [rbp-176]
+        vmovaps ZMMWORD PTR [rbp-496], zmm1
+        vmovaps zmm1, ZMMWORD PTR [rbp-240]
+        vmovaps ZMMWORD PTR [rbp-560], zmm1
+        vmovaps ZMMWORD PTR [rbp-624], zmm0
+        vmovaps zmm0, ZMMWORD PTR [rbp-496]
+        vmovaps zmm2, ZMMWORD PTR [rbp-560]
+        vmovaps zmm1, ZMMWORD PTR [rbp-624]
+        mov     eax, -1
+        kmovw   k1, eax
+        vfmadd132ps     zmm0{k1}, zmm1, zmm2
+        nop
+        vmovaps ZMMWORD PTR [rbp-304], zmm0
+        mov     eax, DWORD PTR [rbp-68]
+        cdqe
+        sal     rax, 2
+        add     rax, OFFSET FLAT:c
+        mov     QWORD PTR [rbp-312], rax
+        vmovaps zmm0, ZMMWORD PTR [rbp-304]
+        vmovaps ZMMWORD PTR [rbp-432], zmm0
+        mov     rax, QWORD PTR [rbp-312]
+        vmovaps zmm0, ZMMWORD PTR [rbp-432]
+        vmovaps ZMMWORD PTR [rax], zmm0
+        nop
+        add     DWORD PTR [rbp-68], 16
+.L11:
+        cmp     DWORD PTR [rbp-68], 99999999
+        jle     .L16
+        add     DWORD PTR [rbp-64], 1
+.L10:
+        cmp     DWORD PTR [rbp-64], 19
+        jle     .L17
+        call    clock
+        mov     QWORD PTR [rbp-88], rax
+        mov     rax, QWORD PTR [rbp-88]
+        sub     rax, QWORD PTR [rbp-80]
+        vcvtsi2sd       xmm0, xmm0, rax
+        vmovsd  xmm1, QWORD PTR .LC2[rip]
+        vdivsd  xmm3, xmm0, xmm1
+        vmovq   rax, xmm3
+        vmovq   xmm0, rax
+        mov     edi, OFFSET FLAT:.LC3
+        mov     eax, 1
+        call    printf
+        mov     DWORD PTR [rbp-72], 0
+        jmp     .L18
+.L21:
+        mov     eax, DWORD PTR [rbp-72]
+        cdqe
+        vmovss  xmm0, DWORD PTR c[0+rax*4]
+        mov     eax, DWORD PTR [rbp-72]
+        cdqe
+        vmovss  xmm1, DWORD PTR d[0+rax*4]
+        vsubss  xmm4, xmm0, xmm1
+        vmovd   eax, xmm4
+        vmovd   xmm0, eax
+        call    std::fabs(float)
+        vmovd   eax, xmm0
+        mov     edx, DWORD PTR [rbp-72]
+        movsx   rdx, edx
+        vmovss  xmm0, DWORD PTR d[0+rdx*4]
+        vmovd   xmm5, eax
+        vdivss  xmm0, xmm5, xmm0
+        vcvtss2sd       xmm0, xmm0, xmm0
+        vcomisd xmm0, QWORD PTR .LC4[rip]
+        seta    al
+        test    al, al
+        je      .L19
+        mov     eax, DWORD PTR [rbp-72]
+        mov     esi, eax
+        mov     edi, OFFSET FLAT:.LC5
+        mov     eax, 0
+        call    printf
+        mov     eax, 0
+        jmp     .L20
+.L19:
+        add     DWORD PTR [rbp-72], 1
+.L18:
+        cmp     DWORD PTR [rbp-72], 99999999
+        jle     .L21
+        mov     edi, OFFSET FLAT:.LC6
+        mov     eax, 0
+        call    printf
+        mov     eax, 0
+.L20:
+        mov     r10, QWORD PTR [rbp-8]
+        leave
+        lea     rsp, [r10-8]
+        ret
+.LC0:
+        .long   2147483647
+        .long   0
+        .long   0
+        .long   0
+.LC1:
+        .long   0
+        .long   1072693248
+.LC2:
+        .long   0
+        .long   1093567616
+.LC4:
+        .long   -350469331
+        .long   1058682594
