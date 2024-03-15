@@ -37,10 +37,10 @@ return 0;
   ![](image-6.png)
 
 #### Plaintext：
-	PLEASEENCRYPTYOURNAMEWITHTHESAMEKEYANDSENDTOTHETA
+	PLEASEENCRYPTYOURNAMEWITHTHESAMEKEYANDUPLOADTOLEARNINGINZJU
 
 #### 分析：
-	可知当offset为10时，依据明文句意"Please encrypt your name with the same key and send to the TA"————继续加密我的姓名"WANGAOZHE"
+	可知当offset为10时，依据明文句意"Please encrypt your name with the same key and upload to Learning In ZJU"————继续加密我的姓名"WANGAOZHE"
 	解密是+offset = 10，则加密相反为-offset = -10，即+offset = -10 % 26 = 16
 * 加密代码实现
 ```cpp
