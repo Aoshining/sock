@@ -35,7 +35,7 @@ CREATE TABLE branch (
 ```
 ![](image-1.png)
 
-##### 2.1.2 添加字段
+##### 2.1.2 添加属性
 ```sql
 ALTER TABLE account ADD branch_name VARCHAR(20);
 ```
@@ -45,12 +45,12 @@ ALTER TABLE account ADD branch_name VARCHAR(20);
 ALTER TABLE account MODIFY account_id VARCHAR(20);
 ```
 
-##### 2.1.4 修改字段名和类型
+##### 2.1.4 修改属性名和类型
 ```sql
 ALTER TABLE account CHANGE username customer_name VARCHAR(20);
 ```
 
-##### 2.1.5 删除字段
+##### 2.1.5 删除属性
 ```sql
 ALTER TABLE customer DROP branch_name;
 ```
@@ -107,12 +107,12 @@ DROP VIEW view_branch;
 
 #### 3. 数据更新
 ##### 3.1 插入数据
-* 给所有字段插入数据
+* 给所有属性插入数据
 ```sql
 INSERT INTO branch VALUES ('hellobank', 'Boston', 10000);
 ```
 
-* 给指定字段插入数据
+* 给指定属性插入数据
 ```sql
 INSERT INTO branch (branch_name, assets) VALUES ('worldbank', 10000);
 ```
@@ -213,17 +213,38 @@ SELECT * FROM account WHERE (branch_name, customer_id) IN (SELECT branch_name, c
 
 #### 5. 视图操作
 ##### 5.1 数据查询
-在左侧SCHEMA中找到待查询的表，右键后点击Select Rows 
+* 可视化操作：
+  在左侧SCHEMA中找到待查询的表，右键后点击Select Rows 
 ![](image-9.png)
+* SQL语句操作：
+  ```sql
+  SELECT * FROM view_branch;
+  ```
 
 即可显示该表视图
 ![](image-13.png)
 
 ##### 5.2 数据更新
-* 编辑表中字段（列）：
-在左侧SCHEMA中找到目标表，右键后点击Alter Table
-![](image-12.png)
+* 可视化操作：
+  * 编辑表中属性（列）：
+  在左侧SCHEMA中找到目标表，右键后点击Alter Table
+  ![](image-12.png)
 
-* 编辑表中数据（行）：
-直接点击待更新的数据即可进行修改，或点击右上角的Edit按钮亦可依次完成编辑现有数据、插入新数据、删除数据
-![](image-14.png)
+  * 编辑表中数据（行）：
+  直接点击待更新的数据即可进行修改，或点击右上角的Edit按钮亦可依次完成编辑现有数据、插入新数据、删除数据
+  ![](image-14.png)
+
+* SQL语句操作：
+  （同上实验步骤2、3部分所述，将TABLE替换为VIEW、表名替换为视图名即可）
+
+* 注意事项：
+	一般情况下视图随着关联表数据变化而更新，表数据也随关联视图数据变化而更新。
+	若视图包含如下任意一项，视图不可更新：
+	1. 聚合函数或窗口函数（SUM()、 MIN()、 MAX()、 COUNT()等）
+	2. DISTINCT
+	3. GROUP BY
+	4. HAVING
+	5. UNION 或者 UNION ALL
+	6. 视图包含子查询
+	7. JOIN
+	8. 存储过程和触发器
