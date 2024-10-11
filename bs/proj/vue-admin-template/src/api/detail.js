@@ -2,7 +2,7 @@ import request from '@/utils/request'
 
 export function getDetail(id) {
   return request({
-    url: '/detail',
+    url: 'compare/detail/',
     method: 'get',
     params: {
       id: id
@@ -12,7 +12,7 @@ export function getDetail(id) {
 
 export function addReview(review) {
   return request({
-    url: '/detail',
+    url: 'compare/detail/',
     method: 'post',
     data: {
       product_id: review.product_id,
@@ -23,3 +23,4 @@ export function addReview(review) {
     }
   })
 }
+

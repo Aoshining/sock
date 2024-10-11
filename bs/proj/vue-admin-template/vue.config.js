@@ -6,7 +6,7 @@ function resolve(dir) {
   return path.join(__dirname, dir)
 }
 
-const name = defaultSettings.title || 'vue Admin Template' // page title
+const name = defaultSettings.title || 'Price Pulse' // page title
 
 // If your port is set to 80,
 // use administrator privileges to execute the command line.
@@ -36,6 +36,12 @@ module.exports = {
       warnings: false,
       errors: true
     },
+    // proxy: {
+    //   '': {
+    //   target: 'http://127.0.0.1:8000',
+    //   changeOrigin: true,
+    //   }
+    // },
     before: require('./mock/mock-server.js')
   },
   configureWebpack: {
