@@ -3,7 +3,7 @@
     <div class="search-box">
       <input
         type="text"
-        placeholder="探索你心仪的商品吧..."
+        placeholder="请输入商品的网页地址"
         v-model="searchQuery"
       />
       <button class="search-btn" @click="handleSearch">

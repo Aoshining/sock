@@ -6,7 +6,8 @@ const getDefaultState = () => {
   return {
     token: getToken(),
     name: '',
-    avatar: ''
+    avatar: '',
+    email: ''
   }
 }
 
@@ -24,6 +25,9 @@ const mutations = {
   },
   SET_AVATAR: (state, avatar) => {
     state.avatar = avatar
+  },
+  SET_EMAIL: (state, email) => {
+    state.email = email
   }
 }
 
@@ -72,6 +76,7 @@ const actions = {
 
         commit('SET_NAME', info['username'])
         commit('SET_AVATAR', 'https://wpimg.wallstcn.com/f778738c-e4f8-4870-b634-56703b4acafe.gif')
+        commit('SET_EMAIL', info['email'])
         resolve(data)
       }).catch(error => {
         reject(error)

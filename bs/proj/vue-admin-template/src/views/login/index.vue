@@ -41,7 +41,7 @@
           </span>
         </el-form-item>
 
-        <el-button :loading="loading" type="primary" style="width:100%;margin-bottom:30px;" @click.native.prevent="handleLogin">登录</el-button>
+        <el-button :loading="loading" type="primary" @click.native.prevent="handleLogin">登录</el-button>
 
         <div class="tips">
           <span style="margin-right:20px;" @click="reset();"> 注册账号 </span>
@@ -122,7 +122,7 @@
           />
         </el-form-item>
 
-        <el-button :loading="loading" type="primary" style="width:100%;margin-bottom:30px;" @click.native.prevent="handleRegister">注册</el-button>
+        <el-button :loading="loading" type="primary" @click.native.prevent="handleRegister">注册</el-button>
 
         <div class="tips">
           <span style="margin-right:20px;" @click="reset();">已有账号？登录</span>
@@ -254,7 +254,7 @@ export default {
     handleLogin() {
       this.loading = true
       this.$store.dispatch('user/login', this.loginForm).then(response => {
-       this.$router.push({ path: this.redirect || '/dashboard' })
+       this.$router.push({ path: this.redirect || '/dashboard/index' })
        if (response.includes('成功'))
          this.$message.success(response)
        else
@@ -279,7 +279,7 @@ $cursor: #fff;
 
 @supports (-webkit-mask: none) and (not (cater-color: $cursor)) {
    .login-container .el-input input {
-    color: $cursor;
+    color: #494949;
   }
 }
 
@@ -296,14 +296,15 @@ $cursor: #fff;
       -webkit-appearance: none;
       border-radius: 0px;
       padding: 12px 5px 12px 15px;
-      color: $light_gray;
+      color: #494949;
       height: 47px;
-      caret-color: $cursor;
+      caret-color: #494949;
 
       &:-webkit-autofill {
-        box-shadow: 0 0 0px 1000px $bg inset !important;
-        -webkit-text-fill-color: $cursor !important;
+      -webkit-text-fill-color: #494949 !important;
+      transition: background-color 5000s ease-in-out 0s !important;
       }
+
     }
   }
 
@@ -312,6 +313,20 @@ $cursor: #fff;
     background: rgba(0, 0, 0, 0.1);
     border-radius: 5px;
     color: #454545;
+  }
+
+  .el-button {
+    width:100%;
+    margin-bottom:30px;
+    font-weight:bold;
+    background-color: #494949;
+    border-color: #494949;
+    transition: background-color 0.3s;
+
+    &:hover {
+      background-color: gray;
+      border-color: gray;
+    }
   }
 }
 
@@ -323,42 +338,61 @@ $dark_gray:#889aa4;
 $light_gray:#eee;
 
 .login-container {
+  background-image: url(bg.png);
+  background-position: center center;
+	background-repeat: no-repeat;
+	background-attachment: fixed;
+	background-size: cover;
   min-height: 100%;
   width: 100%;
-  background-color: $bg;
   overflow: hidden;
+  top: 50px;
+  font-family: 'PingFang SC',sans-serif;
+  font-weight: bold;
+  color: #494949;
 
   .login-form {
     position: relative;
     width: 520px;
     max-width: 100%;
     padding: 160px 35px 0;
-    margin: 0 auto;
+    margin: 80px auto;
     overflow: hidden;
+    box-shadow: 0 80px 30px 10px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+    border-width: 2px;
+    border-radius: 30px;
+    border-style: dashed;
   }
+
 
   .register-form {
     position: relative;
     width: 520px;
     max-width: 100%;
     padding: 160px 35px 0;
-    margin: 0 auto;
+    margin: 20px auto;
     overflow: hidden;
+    box-shadow: 0 30px 30px 8px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+    border-width: 2px;
+    border-radius: 30px;
+    border-style: dashed;
   }
 
   .tips {
     font-size: 14px;
-    color: #fff;
-    margin-bottom: 10px;
+    //color: #fff;
+    margin-bottom: 30px;
 
     span {
       cursor: pointer;
       font-weight: bold;
-      color: $dark_gray;
+      //color: $dark_gray;
       transition: color 0.3s;
 
       &:hover {
-        color: $light_gray;
+        color: gray;
       }
 
       &:first-of-type {
@@ -369,7 +403,7 @@ $light_gray:#eee;
 
   .svg-container {
     padding: 6px 5px 6px 15px;
-    color: $dark_gray;
+    //color: $dark_gray;
     vertical-align: middle;
     width: 30px;
     display: inline-block;
@@ -377,13 +411,14 @@ $light_gray:#eee;
 
   .title-container {
     position: relative;
+    margin-top: -60px;
 
     .title {
-      font-size: 36px;
-      color: $light_gray;
-      margin: 0px auto 40px auto;
+      font-style: italic;
+      font-size: 60px;
+      font-family: 'Georgia', sans-serif;
+      margin: 0 auto 80px auto;
       text-align: center;
-      font-weight: bold;
     }
   }
 
@@ -392,7 +427,7 @@ $light_gray:#eee;
     right: 10px;
     top: 7px;
     font-size: 16px;
-    color: $dark_gray;
+    //color: $dark_gray;
     cursor: pointer;
     user-select: none;
   }

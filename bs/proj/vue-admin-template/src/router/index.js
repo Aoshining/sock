@@ -172,23 +172,64 @@ export const constantRoutes = [
         path: 'index',
         name: '首页',
         component: () => import('@/views/dashboard/index'),
-        meta: { title: '首页', icon: 'dashboard'}
+        meta: { title: '首页', icon: 'home'}
       }
     ]
   },
 
   {
-    path: '/detail',
+    path: '/like',
     component: Layout,
     children: [
       {
         path: 'index',
-        name: '商品详情',
-        component: () => import('@/views/detail/index'),
-        meta: { title: '商品详情', icon: 'form'}
+        name: '我喜欢的',
+        component: () => import('@/views/like/index'),
+        meta: { title: '我喜欢的', icon: 'like'}
       }
     ]
    },
+
+  {
+    path: '/history',
+    component: Layout,
+    children: [
+      {
+        path: 'index',
+        name: '我的足迹',
+        component: () => import('@/views/history/index'),
+        meta: { title: '我的足迹', icon: 'history'}
+      }
+    ]
+   },
+
+  {
+    path: '/price',
+    component: Layout,
+    children: [
+      {
+        path: 'index',
+        name: '历史价格',
+        component: () => import('@/views/price/index'),
+        meta: { title: '历史价格', icon: 'price'}
+      }
+    ]
+   },
+
+  {
+    path: '/info',
+    component: Layout,
+    children: [
+      {
+        path: 'index',
+        name: '个人信息',
+        component: () => import('@/views/info/index'),
+        meta: { title: '个人信息', icon: 'info'}
+      }
+    ]
+   },
+
+
 
   // 404 page must be placed at the end !!!
   { path: '*', redirect: '/404', hidden: true }

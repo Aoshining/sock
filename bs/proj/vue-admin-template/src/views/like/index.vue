@@ -2,7 +2,7 @@
 	import {
 		getDetail,
 		addReview
-	} from '@/api/detail'
+	} from '@/api/like'
 
 	export default {
 		filters: {
@@ -72,29 +72,29 @@
 
 <template>
 	<div class="app-container">
-	  <el-row display="margin-top:10px">
-	    <el-input v-model="input_bookname" placeholder="请输入书名" style="display:inline-table; width: 30%; float:left"></el-input>
-	    <el-button type="primary" @click="addBook()" style="float:left; margin: 2px;">新增</el-button>
-	  </el-row>
-	  <el-row>
-	    <el-table :data="list_book" element-loading-text="Loading" border fit highlight-current-row>
-	      <el-table-column align="center" label="ID" width="95">
-	        <template slot-scope="scope">
-	          {{ scope.row.pk }}
-	        </template>
-	      </el-table-column>
-	      <el-table-column label="Book_name">
-	        <template slot-scope="scope">
-	          {{ scope.row.fields.book_name }}
-	        </template>
-	      </el-table-column>
-	      <el-table-column label="Time" align="center">
-	        <template slot-scope="scope">
-	          <span>{{ scope.row.fields.add_time }}</span>
-	        </template>
-	      </el-table-column>
-	    </el-table>
-	  </el-row>
+<!--	  <el-row display="margin-top:10px">-->
+<!--	    <el-input v-model="input_bookname" placeholder="请输入书名" style="display:inline-table; width: 30%; float:left"></el-input>-->
+<!--	    <el-button type="primary" @click="addBook()" style="float:left; margin: 2px;">新增</el-button>-->
+<!--	  </el-row>-->
+<!--	  <el-row>-->
+<!--	    <el-table :data="list_book" element-loading-text="Loading" border fit highlight-current-row>-->
+<!--	      <el-table-column align="center" label="ID" width="95">-->
+<!--	        <template slot-scope="scope">-->
+<!--	          {{ scope.row.pk }}-->
+<!--	        </template>-->
+<!--	      </el-table-column>-->
+<!--	      <el-table-column label="Book_name">-->
+<!--	        <template slot-scope="scope">-->
+<!--	          {{ scope.row.fields.book_name }}-->
+<!--	        </template>-->
+<!--	      </el-table-column>-->
+<!--	      <el-table-column label="Time" align="center">-->
+<!--	        <template slot-scope="scope">-->
+<!--	          <span>{{ scope.row.fields.add_time }}</span>-->
+<!--	        </template>-->
+<!--	      </el-table-column>-->
+<!--	    </el-table>-->
+<!--	  </el-row>-->
 	</div>
 </template>
 
