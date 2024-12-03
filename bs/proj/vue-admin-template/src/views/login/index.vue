@@ -137,8 +137,8 @@
 export default {
   data() {
     const validateUsername = (rule, value, callback) => {
-      if (!value || value.length < 6) {
-        callback(new Error('用户名不可少于6位'))
+      if (!value || value.length <= 6) {
+        callback(new Error('用户名需大于6位'))
       }
       else if (value.length > 16) {
         callback(new Error('用户名不可超过16位'))
@@ -148,8 +148,8 @@ export default {
       }
     }
     const validatePassword = (rule, value, callback) => {
-      if (!value || value.length < 6) {
-        callback(new Error('密码不可少于6位'))
+      if (!value || value.length <= 6) {
+        callback(new Error('密码需大于6位'))
       }
       else if (value.length > 16) {
         callback(new Error('密码不可超过16位'))
@@ -197,7 +197,7 @@ export default {
       loading: false,
       passwordType: 'password',
       redirect: undefined,
-      login: true
+      login: true,
     }
   },
   watch: {
@@ -236,7 +236,7 @@ export default {
          this.$store.dispatch('user/register', this.registerForm).then(response => {
            if (response.includes('成功')) {
              this.$message.success(response)
-             reset()
+             this.reset()
            }
            else
              this.$message.error(response)
@@ -246,23 +246,30 @@ export default {
            this.loading = false
          })
        } else {
-         this.$message.error('请检查用户名或密码格式')
+         this.$message.error('请检查所填信息格式')
        }
     })
     },
 
     handleLogin() {
-      this.loading = true
-      this.$store.dispatch('user/login', this.loginForm).then(response => {
-       this.$router.push({ path: this.redirect || '/dashboard/index' })
-       if (response.includes('成功'))
-         this.$message.success(response)
-       else
-         this.$message.error(response)
-       this.loading = false
-      }).catch(error => {
-       console.log(error)
-       this.loading = false
+      this.$refs.loginForm.validate(valid => {
+        if (valid) {
+          this.loading = true
+          this.$store.dispatch('user/login', this.loginForm).then(response => {
+            this.$router.push({path: this.redirect || '/dashboard/index'})
+            if (response.includes('成功'))
+              this.$message.success(response)
+            else
+              this.$message.error(response)
+            this.loading = false
+          }).catch(error => {
+            console.log(error)
+            this.loading = false
+          })
+        }
+        else {
+          this.$message.error('请检查所填信息格式')
+        }
       })
     }
   }
@@ -353,7 +360,7 @@ $light_gray:#eee;
 
   .login-form {
     position: relative;
-    width: 520px;
+    width: 420px;
     max-width: 100%;
     padding: 160px 35px 0;
     margin: 80px auto;
@@ -368,7 +375,7 @@ $light_gray:#eee;
 
   .register-form {
     position: relative;
-    width: 520px;
+    width: 420px;
     max-width: 100%;
     padding: 160px 35px 0;
     margin: 20px auto;

@@ -48,3 +48,27 @@ class ProductImage(models.Model):
 
     def __str__(self):
         return f"Image {self.id} for {self.product.name}"
+
+class jdCookie(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    cookie = models.TextField()  # 存储cookie的字段，使用TextField因为它可能很长
+    created_at = models.DateTimeField(auto_now_add=True)  # 创建时间
+
+    def __str__(self):
+        return f"{self.user.username}'s jd_cookie"
+
+class snCookie(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    cookie = models.TextField()  # 存储cookie的字段，使用TextField因为它可能很长
+    created_at = models.DateTimeField(auto_now_add=True)  # 创建时间
+
+    def __str__(self):
+        return f"{self.user.username}'s sn_cookie"
+
+class vipCookie(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    cookie = models.TextField()  # 存储cookie的字段，使用TextField因为它可能很长
+    created_at = models.DateTimeField(auto_now_add=True)  # 创建时间
+
+    def __str__(self):
+        return f"{self.user.username}'s vip_cookie"

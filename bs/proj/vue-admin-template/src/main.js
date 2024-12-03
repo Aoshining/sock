@@ -42,3 +42,6 @@ new Vue({
   store,
   render: h => h(App)
 })
+
+// axios.defaults.baseURL = 'http://10.162.16.99:8000'
+axios.defaults.baseURL = 'http://localhost:8000'
