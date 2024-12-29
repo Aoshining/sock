@@ -39,12 +39,6 @@ export const constantRoutes = [
   },
 
   {
-    path: '/404',
-    component: () => import('@/views/404'),
-    hidden: true
-  },
-
-  {
     path: '/',
     redirect: '/login',
   },
@@ -103,8 +97,8 @@ export const constantRoutes = [
 
 
 
-  // 404 page must be placed at the end !!!
-  { path: '*', redirect: '/404', hidden: true }
+  // 输入错误 URL 重定向到登录页面或首页
+  { path: '*', redirect: '/', hidden: true }
 ]
 
 const createRouter = () => new Router({

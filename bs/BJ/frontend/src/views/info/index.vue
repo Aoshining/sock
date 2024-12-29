@@ -100,7 +100,7 @@ export default {
       rules: {
         name: [
           { required: true, message: '请输入用户名', trigger: 'blur' },
-          { min: 2, max: 20, message: '长度在 2 到 20 个字符', trigger: 'blur' }
+          { min: 7, max: 32, message: '长度在 7 到 32 个字符', trigger: 'blur' }
         ],
         email: [
           { required: true, message: '请输入邮箱地址', trigger: 'blur' },
@@ -169,6 +169,8 @@ export default {
             this.$message.error('更新失败，请重试')
           })
         }
+        else
+          this.$message.error('请检查所填信息格式')
       })
     },
 
