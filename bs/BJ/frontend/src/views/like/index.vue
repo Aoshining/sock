@@ -371,6 +371,20 @@ export default {
   overflow: hidden;
   box-shadow: 0 20px 30px rgba(0, 0, 0, 0.2);
 
+  // 添加对话框打开时的动画效果
+  animation: dialogFadeIn 0.3s ease-out;
+
+  @keyframes dialogFadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
   .el-dialog__header {
     padding: 20px 20px 10px;
     text-align: center;
@@ -388,6 +402,15 @@ export default {
       i {
         color: #f56c6c;
         font-size: 20px;
+
+        // 添加警告图标的动画效果
+        animation: warningShake 0.5s ease-in-out;
+        
+        @keyframes warningShake {
+          0%, 100% { transform: rotate(0); }
+          25% { transform: rotate(-10deg); }
+          75% { transform: rotate(10deg); }
+        }
       }
     }
 
@@ -411,6 +434,12 @@ export default {
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
         overflow: hidden;
+
+        // 添加文字渐变效果
+        background: linear-gradient(45deg, #409EFF, #66b1ff);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-weight: 500;
       }
 
       .confirm-text {
@@ -456,6 +485,30 @@ export default {
           &:hover {
             background-color: #66b1ff;
             border-color: #66b1ff;
+          }
+        }
+
+        // 添加按钮阴影效果
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+
+        &:hover {
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        &--default {
+          // 添加渐变边框效果
+          background: linear-gradient(#fff, #fff) padding-box,
+                     linear-gradient(45deg, #409EFF, #66b1ff) border-box;
+          border: 1px solid transparent;
+        }
+
+        &--primary {
+          // 添加渐变背景效果
+          background: linear-gradient(45deg, #409EFF, #66b1ff);
+          border: none;
+
+          &:hover {
+            background: linear-gradient(45deg, #66b1ff, #409EFF);
           }
         }
       }

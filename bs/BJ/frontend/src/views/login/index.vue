@@ -13,7 +13,7 @@
           <el-input
             ref="username"
             v-model="loginForm.username"
-            placeholder="Username"
+            placeholder="Username or Email"
             name="username"
             type="text"
             tabindex="1"
@@ -140,8 +140,8 @@ export default {
       if (!value || value.length <= 6) {
         callback(new Error('用户名需大于6位'))
       }
-      else if (value.length > 16) {
-        callback(new Error('用户名不可超过16位'))
+      else if (value.length > 32) {
+        callback(new Error('用户名不可超过32位'))
       }
       else {
         callback()

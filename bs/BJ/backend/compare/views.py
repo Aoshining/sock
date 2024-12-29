@@ -62,14 +62,22 @@ class Login(APIView):
         if req['method'] == 'login':
             try:
                 user = authenticate(request, username=req['username'], password=req['password'])
-                if user is not None:
-                    # 用户名和密码正确
-                    # 为用户生成或获取 Token
-                    token, created = Token.objects.get_or_create(user=user)
-                    return Response({'token': token.key, 'message': '登录成功'})
-                else:
+                if user is None:
+                    # 尝试邮箱登录
+                    user = User.objects.filter(email=req['username']).first()
+                    if user is not None:
+                        username = user.username
+                        user = authenticate(request, username=username, password=req['password'])
+                        if user is not None:
+                            # 用户名和密码正确
+                            # 为用户生成或获取 Token
+                            token, created = Token.objects.get_or_create(user=user)
+                            return Response({'token': token.key, 'message': '登录成功'})
                     # 用户名或密码错误
                     return Response({'message': '用户名或密码错误'})
+                else:
+                    token, created = Token.objects.get_or_create(user=user)
+                    return Response({'token': token.key, 'message': '登录成功'})
             except Exception as e:
                 print(str(e))
                 return Response({'message': str(e)})
