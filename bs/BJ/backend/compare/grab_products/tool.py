@@ -23,7 +23,7 @@ def web_driver():
     option.add_experimental_option('excludeSwitches', ['enable-automation'])
     option.add_argument('--headless')
     option.add_argument('--disable-gpu')
-    service = Service(executable_path='E:\Program Files\Google\Chrome\Application\chromedriver.exe')
+    service = Service(executable_path='/usr/local/bin/chromedriver')
     bro = webdriver.Chrome(service=service, options=option)
     return bro
 

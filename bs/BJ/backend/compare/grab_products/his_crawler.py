@@ -19,13 +19,14 @@ def his_crawler(bro, link):
         btn = bro.find_element('xpath', value='/html/body/div[3]/div[1]/div[1]/form/button')
     safe_click(bro, btn)
     try:
-        element = WebDriverWait(bro, 3).until(EC.visibility_of_element_located(('xpath', '//*[@id="titlespId"]')))
+        element = WebDriverWait(bro, 5).until(EC.visibility_of_element_located(('xpath', '//*[@id="titlespId"]')))
 
         # 商品标题
         goods_title = ''.join(element.text)
 
         # 商品价格
-        goods_price = bro.find_element('xpath','//*[@id="Acontainertooltip"]').text
+        element = WebDriverWait(bro, 5).until(EC.visibility_of_element_located(('xpath', '//*[@id="Acontainertooltip"]')))
+        goods_price = element.text
         if num(goods_price) == '':
             return []
 
@@ -49,5 +50,6 @@ def his_crawler(bro, link):
             'time': time.strftime('%Y-%m-%d %H:%M', time.localtime())
         })
         return goods_info
-    except:
+    except Exception as e:
+        print(e)
         return []

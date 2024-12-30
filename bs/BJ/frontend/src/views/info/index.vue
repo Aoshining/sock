@@ -150,7 +150,7 @@ export default {
         if (valid) {
           axios.post('/compare/info/', {
             method: 'update_profile',
-            user_id: this.id,
+            user_id: this.$store.getters.id,
             name: this.profileForm.name,
             email: this.profileForm.email
           }).then(response => {
